@@ -1,8 +1,66 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { uniqueid, matchPath, normalizePath, generateUniqueHash, bezierEasing } from "./utils";
 import queryString from "query-string";
 
 const storage_ids: string[] = [];
+
+/**
+ * @description Hook que permite atualizar a IU de maneira otimista.
+ * @template T Tipo do estado
+ * @template V Tipo do valor otimista
+ * @param {T} state Estado atual
+ * @param {(currentState: T, optimisticValue: V) => T} updateFn Função de atualização
+ * @returns {[T, function]} Estado otimista e função de adição otimista
+ * @example
+ * const App = () => {
+ *  const [messages, setMessages] = useState([]);
+ *
+ *  const [optimisticMessages, addOptimisticMessage] = useOptimistic(
+ *      messages,
+ *      (currentState, optimisticValue) => {
+ *          return [...currentState, {...optimisticValue, sending: true}];
+ *      }
+ *  );
+ *
+ *  const handleClick = () => {
+ *      const id = uniqueid(16);
+ *      addOptimisticMessage({id, text: "Nova mensagem"});
+ *      fetch("https://api.example.com/messages", {
+ *          method: "POST",
+ *          body: JSON.stringify({id, text: "Nova mensagem"}),
+ *          headers: {
+ *              "Content-Type": "application/json",
+ *          },
+ *      });
+ *  };
+ *
+ *  return (
+ *      <div>
+ *          <ul>
+ *              {optimisticMessages.map((message) => (
+ *                  <li key={message.id}>{message.text}</li>
+ *              ))}
+ *          </ul>
+ *          <button onClick={handleClick}>Adicionar mensagem</button>
+ *      </div>
+ *  );
+ * };
+ */
+export const useOptimistic = <T = any, V = any>(state: T, updateFn: (currentState: T, optimisticValue: V) => T): [T, (value: V) => void] => {
+	const [optimisticState, setOptimisticState] = useState<T>(state);
+
+	useEffect(() => {
+		setOptimisticState(state);
+	}, [state]);
+
+	const addOptimistic = (value: V) => {
+		setOptimisticState((currentState) => {
+			return updateFn(currentState, value);
+		});
+	};
+
+	return [optimisticState, addOptimistic];
+};
 
 /**
  * @description Gancho para gerar um ID exclusivo
@@ -1200,5 +1258,5 @@ export const useFitText = <T extends HTMLElement, I extends HTMLElement>(
 			cancelAnimationFrame(frameNumber);
 			window.removeEventListener("resize", fitText);
 		};
-	}, [minFontSize, maxFontSize]);
+	}, [minFontSize, maxFontSize, textRef.current, containerRef.current, increment]);
 };

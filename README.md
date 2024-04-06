@@ -6,6 +6,7 @@ Essa lib é um conjunto de hooks que facilitam o desenvolvimento de aplicações
   - [Instalação](#instalação)
   - [Uso](#uso)
   - [Hooks](#hooks)
+    - [useOptimistic](#useoptimistic)
     - [useId](#useid)
     - [useProxy](#useproxy)
     - [useDebounceCallbackEffect](#usedebouncecallbackeffect)
@@ -58,6 +59,56 @@ const App: React.FC = () => {
 
 ## Hooks
 
+### useOptimistic
+
+```ts
+useOptimistic<T = any, V = any>(
+    state: T, 
+    updateFn: (currentState: T, optimisticValue: V) => T
+): [T, (value: V) => void]
+```
+
+Hook que permite atualizar o estado de forma otimista.
+
+- `state`: Estado atual.
+- `updateFn`: Função que atualiza o estado de forma otimista.
+- `value`: Valor otimista.
+- `return`: Retorna o estado atual e uma função para adicionar um valor otimista.
+
+```tsx
+import React from 'react';
+import { useOptimistic } from 'react-use-utils';
+
+const App: React.FC = () => {
+  const [messages, setMessages] = useState([]);
+
+  const [optimisticMessages, addOptimisticMessage] = useOptimistic(messages, (currentState, optimisticValue) => {
+    return [...currentState, {...optimisticValue, sending: true}];
+  });
+
+  const addMessage = (message) => {
+    addOptimisticMessage(message);
+    fetch('https://api.example.com/messages', {
+      method: 'POST',
+      body: JSON.stringify(message),
+    }).then(() => {
+      setMessages([...messages, message]);
+    });
+  };
+
+  return (
+    <div>
+      {optimisticMessages.map((message) => (
+        <div key={message.id}>{message.text}</div>
+      ))}
+      <button onClick={() => addMessage({ id: messages.length, text: 'Hello' })}>
+        Add message
+      </button>
+    </div>
+  );
+};
+```
+
 ### useId
 
 ```ts
@@ -65,6 +116,9 @@ useId(idName?: string): string
 ```
 
 Gancho para gerar um ID exclusivo.
+
+- `idName`: Nome do ID.
+- `return`: Retorna um ID exclusivo.
 
 ```tsx
 import React from 'react';
@@ -84,6 +138,10 @@ useProxy<T extends object>(target: T, onChange?: (target: T) => void): T
 ```
 
 Observa as alterações em um objeto e executa uma função de retorno quando ocorre uma mudança.
+
+- `target`: Objeto alvo.
+- `onChange`: Função de retorno.
+- `return`: Retorna um objeto proxy.
 
 ```tsx
 import React from 'react';
@@ -120,6 +178,11 @@ useDebounceCallbackEffect(
 
 Hook que executa um callback após um determinado tempo de espera (delay), mas só executa uma vez, mesmo que as dependências mudem antes do fim do delay.
 
+- `callback`: Função de retorno.
+- `delay`: Tempo de espera.
+- `dependencies`: Dependências.
+- `return`: Retorna `void`.
+
 ```tsx
 import React, { useState } from 'react';
 import { useDebounceCallbackEffect } from 'react-use-utils';
@@ -153,6 +216,10 @@ useDebounce<T = any>(value: T, delay: number): T
 
 Hook que retorna um valor após um determinado tempo de espera (delay).
 
+- `value`: Valor.
+- `delay`: Tempo de espera.
+- `return`: Retorna o valor após o tempo de espera.
+
 ```tsx
 import React, { useState } from 'react';
 import { useDebounce } from 'react-use-utils';
@@ -182,6 +249,10 @@ useWindowSize(): { width: number; height: number }
 
 Hook que retorna a largura e a altura da janela do navegador.
 
+- `width`: Largura da janela.
+- `height`: Altura da janela.
+- `return`: Retorna a largura e a altura da janela.
+
 ```tsx
 import React from 'react';
 import { useWindowSize } from 'react-use-utils';
@@ -210,6 +281,14 @@ useAsync<T = any>(asyncFunction: (...props: any[]) => Promise<T>, immediate?: bo
 ```
 
 Hook que executa uma função assíncrona e retorna o status da execução, o valor retornado e o erro, caso ocorra.
+
+- `asyncFunction`: Função assíncrona.
+- `immediate`: Se `true`, a função é executada imediatamente.
+- `execute`: Função para executar a função assíncrona.
+- `status`: Status da execução.
+- `value`: Valor retornado.
+- `error`: Erro, caso ocorra.
+- `return`: Retorna um objeto com as propriedades `execute`, `status`, `value` e `error`.
 
 ```tsx
 import React from 'react';
@@ -244,6 +323,12 @@ useToggle(initialValue: boolean): [boolean, () => void]
 ```
 
 Hook que retorna um valor booleano e uma função para alternar entre `true` e `false`.
+
+- `initialValue`: Valor inicial.
+- `return`: Retorna um array com o valor booleano e a função para alternar.
+- `value`: Valor booleano.
+- `toggle`: Função para alternar.
+- `return`: Retorna um array com o valor booleano e a função para alternar.
 
 ```tsx
 import React from 'react';
@@ -282,6 +367,21 @@ useRouter(path?: string | string[] | RegExp | RegExp[]): {
 
 Hook que retorna informações sobre a rota atual e funções para navegar entre as rotas.
 
+- `path`: Caminho da rota.
+- `go`: Navega para uma rota específica.
+- `back`: Navega para a rota anterior.
+- `forward`: Navega para a próxima rota.
+- `push`: Adiciona uma nova rota ao histórico.
+- `replace`: Substitui a rota atual.
+- `state`: Estado da rota.
+- `hash`: Hash da rota.
+- `pathname`: Caminho da rota.
+- `query`: Query string da rota.
+- `search`: Parâmetros da query string.
+- `length`: Número de rotas no histórico.
+- `currentIndex`: Índice da rota atual.
+- `return`: Retorna um objeto com as propriedades `go`, `back`, `forward`, `push`, `replace`, `state`, `hash`, `pathname`, `query`, `search`, `length` e `currentIndex`.
+
 ```tsx
 import React from 'react';
 import { useRouter } from 'react-use-utils';
@@ -312,6 +412,12 @@ useEventListener<E extends HTMLElement, K extends keyof GlobalEventHandlersEvent
 
 Hook que adiciona um ouvinte de eventos a um elemento.
 
+- `element`: Elemento.
+- `eventName`: Nome do evento.
+- `eventHandler`: Função de retorno.
+- `wantsUntrusted`: Se `true`, o ouvinte de eventos também recebe eventos não confiáveis.
+- `return`: Retorna `void`.
+
 ```tsx
 import React, { useRef } from 'react';
 import { useEventListener } from 'react-use-utils';
@@ -340,6 +446,10 @@ useMediaQuery<T = any>(queries: {
 ```
 
 Hook que retorna um valor com base em uma consulta de mídia.
+
+- `queries`: Consultas de mídia.
+- `defaultValue`: Valor padrão.
+- `return`: Retorna um valor com base na consulta de mídia.
 
 ```tsx
 import React from 'react';
@@ -388,6 +498,16 @@ useStateHistory<T = any>(initialPresent: T): {
 
 Hook que gerencia o histórico de estados.
 
+- `initialPresent`: Estado inicial.
+- `state`: Estado atual.
+- `set`: Função para definir um novo estado.
+- `undo`: Função para desfazer a última ação.
+- `redo`: Função para refazer a última ação.
+- `clear`: Função para limpar o histórico.
+- `canUndo`: Se `true`, é possível desfazer a última ação.
+- `canRedo`: Se `true`, é possível refazer a última ação.
+- `return`: Retorna um objeto com as propriedades `state`, `set`, `undo`, `redo`, `clear`, `canUndo` e `canRedo`.
+
 ```tsx
 import React from 'react';
 import { useStateHistory } from 'react-use-utils';
@@ -420,6 +540,9 @@ useScript(src: string): "error" | "idle" | "loading" | "ready"
 
 Hook que carrega um script.
 
+- `src`: URL do script.
+- `return`: Retorna o status do script.
+
 ```tsx
 import React from 'react';
 import { useScript } from 'react-use-utils';
@@ -438,6 +561,10 @@ useKeyPress(targetKey: KeyboardEvent["key"], callback: (pressed:boolean) => void
 ```
 
 Hook que executa um callback quando uma tecla é pressionada.
+
+- `targetKey`: Tecla alvo.
+- `callback`: Função de retorno.
+- `return`: Retorna `void`.
 
 ```tsx
 import React from 'react';
@@ -462,6 +589,10 @@ useOnScreen<T extends HTMLElement>(
 ```
 
 Hook que verifica se um elemento está visível na tela.
+
+- `ref`: Referência do elemento.
+- `rootMargin`: Margem do elemento.
+- `return`: Retorna `true` se o elemento estiver visível.
 
 ```tsx
 import React, { useRef } from 'react';
@@ -489,6 +620,9 @@ usePrevious<T = any>(value: T): T | undefined
 ```
 
 Hook que retorna o valor anterior.
+
+- `value`: Valor atual.
+- `return`: Retorna o valor anterior.
 
 ```tsx
 import React, { useState } from 'react';
@@ -519,6 +653,10 @@ useOnClickOutside<T extends HTMLElement>(
 
 Hook que executa um callback quando um clique fora de um elemento é detectado.
 
+- `ref`: Referência do elemento.
+- `handler`: Função de retorno.
+- `return`: Retorna `void`.
+
 ```tsx
 import React, { useRef } from 'react';
 import { useOnClickOutside } from 'react-use-utils';
@@ -548,6 +686,9 @@ useHover<T extends HTMLElement>(ref: React.RefObject<T>): boolean
 
 Hook que verifica se um elemento está sendo passado o mouse por cima.
 
+- `ref`: Referência do elemento.
+- `return`: Retorna `true` se o mouse estiver passando por cima do elemento.
+
 ```tsx
 import React, { useRef } from 'react';
 import { useHover } from 'react-use-utils';
@@ -573,6 +714,11 @@ useCounterTimer(delay?: number, duration?: number, delayFrame?: number): number
 ```
 
 Hook que retorna o tempo decorrido desde o início da contagem.
+
+- `delay`: Tempo de espera.
+- `duration`: Duração da contagem.
+- `delayFrame`: Quadro de atraso.
+- `return`: Retorna o tempo decorrido.
 
 ```tsx
 import React from 'react';
@@ -639,6 +785,53 @@ useBezierEasing(
 
 Hook que retorna um valor com base em uma função de easing.
 
+- `easing`: Função de easing.
+  - `[number, number, number, number]`: Curva de Bezier.
+  - `[[number, number], [number, number]]`: Curva de Bezier.
+  - `"linear"`: Linear.
+  - `"elastic"`: Elástico.
+  - `"ease"`: Suave.
+  - `"ease-in"`: Suave de entrada.
+  - `"ease-in-elastic"`: Suave de entrada elástica.
+  - `"ease-in-bounce"`: Suave de entrada de salto.
+  - `"ease-in-expo"`: Suave de entrada exponencial.
+  - `"ease-in-sine"`: Suave de entrada senoidal.
+  - `"ease-in-quad"`: Suave de entrada quadrática.
+  - `"ease-in-cubic"`: Suave de entrada cúbica.
+  - `"ease-in-back"`: Suave de entrada de volta.
+  - `"ease-in-quart"`: Suave de entrada quartica.
+  - `"ease-in-quint"`: Suave de entrada quintica.
+  - `"ease-in-circ"`: Suave de entrada circular.
+  - `"ease-in-out"`: Suave de entrada e saída.
+  - `"ease-in-out-elastic"`: Suave de entrada e saída elástica.
+  - `"ease-in-out-bounce"`: Suave de entrada e saída de salto.
+  - `"ease-in-out-sine"`: Suave de entrada e saída senoidal.
+  - `"ease-in-out-quad"`: Suave de entrada e saída quadrática.
+  - `"ease-in-out-cubic"`: Suave de entrada e saída cúbica.
+  - `"ease-in-out-back"`: Suave de entrada e saída de volta.
+  - `"ease-in-out-quart"`: Suave de entrada e saída quartica.
+  - `"ease-in-out-quint"`: Suave de entrada e saída quintica.
+  - `"ease-in-out-expo"`: Suave de entrada e saída exponencial.
+  - `"ease-in-out-circ"`: Suave de entrada e saída circular.
+  - `"ease-out"`: Suave de saída.
+  - `"ease-out-elastic"`: Suave de saída elástica.
+  - `"ease-out-bounce"`: Suave de saída de salto.
+  - `"ease-out-sine"`: Suave de saída senoidal.
+  - `"ease-out-quad"`: Suave de saída quadrática.
+  - `"ease-out-cubic"`: Suave de saída cúbica.
+  - `"ease-out-back"`: Suave de saída de volta.
+  - `"ease-out-quart"`: Suave de saída quartica.
+  - `"ease-out-quint"`: Suave de saída quintica.
+  - `"ease-out-expo"`: Suave de saída exponencial.
+  - `"ease-out-circ"`: Suave de saída circular.
+  - `"fast-out-slow-in"`: Rápido de saída lento de entrada.
+  - `"fast-out-linear-in"`: Rápido de saída linear de entrada.
+  - `"linear-out-slow-in"`: Linear de saída lento de entrada.
+- `delay`: Tempo de espera.
+- `duration`: Duração.
+- `delayFrame`: Quadro de atraso.
+- `return`: Retorna um valor com base na função de easing.
+
 ```tsx
 import React from 'react';
 import { useBezierEasing } from 'react-use-utils';
@@ -657,6 +850,10 @@ useLocalStorage<T = any>(key: string, initialValue: T): [T, (value: T|(previous:
 ```
 
 Hook que armazena um valor no `localStorage`.
+
+- `key`: Chave.
+- `initialValue`: Valor inicial.
+- `return`: Retorna um array com o valor e uma função para definir um novo valor.
 
 ```tsx
 import React from 'react';
@@ -694,6 +891,17 @@ useElementRect<T extends HTMLElement>(ref: React.RefObject<T>): {
 
 Hook que retorna as dimensões de um elemento.
 
+- `ref`: Referência do elemento.
+- `width`: Largura.
+- `height`: Altura.
+- `bottom`: Distância do topo.
+- `top`: Distância da base.
+- `left`: Distância da esquerda.
+- `right`: Distância da direita.
+- `x`: Posição horizontal.
+- `y`: Posição vertical.
+- `return`: Retorna um objeto com as propriedades `width`, `height`, `bottom`, `top`, `left`, `right`, `x` e `y`.
+
 ```tsx
 import React, { useRef } from 'react';
 import { useElementRect } from 'react-use-utils';
@@ -727,6 +935,13 @@ useFitText<T extends HTMLElement, I extends HTMLElement>(
 ```
 
 Hook que ajusta o tamanho do texto para caber no contêiner.
+
+- `textRef`: Referência do texto.
+- `containerRef`: Referência do contêiner.
+- `minFontSize`: Tamanho mínimo da fonte.
+- `maxFontSize`: Tamanho máximo da fonte.
+- `increment`: Incremento.
+- `return`: Retorna `void`.
 
 ```tsx
 import React, { useRef } from 'react';
