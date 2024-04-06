@@ -15,26 +15,26 @@ const storage_ids: string[] = [];
  * };
  */
 export const useId = (idName?: string) => {
-    const [id] = useState<string>(
-        (() => {
-            if (typeof idName === "string") {
-                if (storage_ids.includes(idName)) {
-                    return idName;
-                } else {
-                    storage_ids.push(idName);
-                    return idName;
-                }
-            }
+	const [id] = useState<string>(
+		(() => {
+			if (typeof idName === "string") {
+				if (storage_ids.includes(idName)) {
+					return idName;
+				} else {
+					storage_ids.push(idName);
+					return idName;
+				}
+			}
 
-            let id = uniqueid(16);
-            while (storage_ids.includes(id)) {
-                id = uniqueid(16);
-            }
+			let id = uniqueid(16);
+			while (storage_ids.includes(id)) {
+				id = uniqueid(16);
+			}
 
-            return id;
-        })()
-    );
-    return id;
+			return id;
+		})(),
+	);
+	return id;
 };
 
 /**
@@ -54,27 +54,27 @@ export const useId = (idName?: string) => {
  * };
  */
 export const useProxy = <T extends object>(target: T, onChange?: (target: T) => void): T => {
-    const [targetMoment, setTargetMoment] = useState<T>(target ?? {});
+	const [targetMoment, setTargetMoment] = useState<T>(target ?? {});
 
-    const bySet = useCallback(
-        (target: T, property: string | symbol, value: any, receiver: any): boolean => {
-            (target as any)[property] = value;
-            setTargetMoment((p) => {
-                return { ...p, [property]: value };
-            });
-            if (typeof onChange === "function") {
-                onChange(target);
-            }
-            return true;
-        },
-        [onChange]
-    );
+	const bySet = useCallback(
+		(target: T, property: string | symbol, value: any, receiver: any): boolean => {
+			(target as any)[property] = value;
+			setTargetMoment((p) => {
+				return { ...p, [property]: value };
+			});
+			if (typeof onChange === "function") {
+				onChange(target);
+			}
+			return true;
+		},
+		[onChange],
+	);
 
-    const state: T = new Proxy<T>(targetMoment, {
-        set: bySet as any,
-    });
+	const state: T = new Proxy<T>(targetMoment, {
+		set: bySet as any,
+	});
 
-    return state;
+	return state;
 };
 
 /**
@@ -98,17 +98,17 @@ export const useProxy = <T extends object>(target: T, onChange?: (target: T) => 
  * };
  */
 export const useDebounceCallbackEffect = (callback: () => void, delay: number, dependencies: any[]) => {
-    const callbackBy = useCallback(() => {
-        callback();
-    }, [callback]);
+	const callbackBy = useCallback(() => {
+		callback();
+	}, [callback]);
 
-    useEffect(() => {
-        const handler = setTimeout(callbackBy, delay);
+	useEffect(() => {
+		const handler = setTimeout(callbackBy, delay);
 
-        return () => {
-            clearTimeout(handler);
-        };
-    }, [...dependencies, delay]);
+		return () => {
+			clearTimeout(handler);
+		};
+	}, [...dependencies, delay]);
 };
 
 /**
@@ -133,19 +133,19 @@ export const useDebounceCallbackEffect = (callback: () => void, delay: number, d
  * };
  */
 export const useDebounce = <T = any>(value: T, delay: number = 1000) => {
-    const [debouncedValue, setDebouncedValue] = useState<T>(value);
+	const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedValue(value);
-        }, delay);
+	useEffect(() => {
+		const handler = setTimeout(() => {
+			setDebouncedValue(value);
+		}, delay);
 
-        return () => {
-            clearTimeout(handler);
-        };
-    }, [value, delay]);
+		return () => {
+			clearTimeout(handler);
+		};
+	}, [value, delay]);
 
-    return debouncedValue;
+	return debouncedValue;
 };
 
 /**
@@ -163,32 +163,32 @@ export const useDebounce = <T = any>(value: T, delay: number = 1000) => {
  * };
  */
 export const useWindowSize = (): {
-    width: number;
-    height: number;
+	width: number;
+	height: number;
 } => {
-    const [windowSize, setWindowSize] = useState({
-        width: 0,
-        height: 0,
-    });
+	const [windowSize, setWindowSize] = useState({
+		width: 0,
+		height: 0,
+	});
 
-    useEffect(() => {
-        let time: number;
-        function handleResize() {
-            clearTimeout(time);
-            time = setTimeout(() => {
-                setWindowSize({
-                    width: window.innerWidth,
-                    height: window.innerHeight,
-                });
-            }, 100);
-        }
-        window.addEventListener("resize", handleResize);
-        handleResize();
-        return () => {
-            window.removeEventListener("resize", handleResize);
-        };
-    }, []);
-    return windowSize;
+	useEffect(() => {
+		let time: NodeJS.Timeout;
+		function handleResize() {
+			clearTimeout(time);
+			time = setTimeout(() => {
+				setWindowSize({
+					width: window.innerWidth,
+					height: window.innerHeight,
+				});
+			}, 100);
+		}
+		window.addEventListener("resize", handleResize);
+		handleResize();
+		return () => {
+			window.removeEventListener("resize", handleResize);
+		};
+	}, []);
+	return windowSize;
 };
 
 /**
@@ -227,35 +227,35 @@ export const useWindowSize = (): {
  * }
  */
 export const useAsync = <T = any>(asyncFunction: (...props: any[]) => Promise<T>, immediate = true) => {
-    const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
-    const [value, setValue] = useState<T | null>(null);
-    const [error, setError] = useState<any | null>(null);
+	const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
+	const [value, setValue] = useState<T | null>(null);
+	const [error, setError] = useState<any | null>(null);
 
-    const execute = useCallback(
-        (...props: any[]) => {
-            setStatus("pending");
-            //setValue(null);
-            setError(null);
-            return Promise.race([asyncFunction.apply(null, props)])
-                .then((response: any) => {
-                    setValue(response);
-                    setStatus("success");
-                })
-                .catch((error) => {
-                    setError(error);
-                    setStatus("error");
-                });
-        },
-        [asyncFunction]
-    );
+	const execute = useCallback(
+		(...props: any[]) => {
+			setStatus("pending");
+			//setValue(null);
+			setError(null);
+			return Promise.race([asyncFunction.apply(null, props)])
+				.then((response: any) => {
+					setValue(response);
+					setStatus("success");
+				})
+				.catch((error) => {
+					setError(error);
+					setStatus("error");
+				});
+		},
+		[asyncFunction],
+	);
 
-    useEffect(() => {
-        if (immediate) {
-            execute();
-        }
-    }, [immediate]);
+	useEffect(() => {
+		if (immediate) {
+			execute();
+		}
+	}, [immediate]);
 
-    return { execute, status, value, error };
+	return { execute, status, value, error };
 };
 
 /**
@@ -269,45 +269,45 @@ export const useAsync = <T = any>(asyncFunction: (...props: any[]) => Promise<T>
  * console.log(isOpen); // Novo valor do estado (true)
  */
 export const useToggle = (initialState: boolean = false) => {
-    const [state, setState] = useState(initialState);
-    const toggle = useCallback(() => setState((state) => !state), []);
-    return [state, toggle];
+	const [state, setState] = useState(initialState);
+	const toggle = useCallback(() => setState((state) => !state), []);
+	return [state, toggle];
 };
 
 let historyLength = 0,
-    historyCurrentIndex = 0;
+	historyCurrentIndex = 0;
 
 const _wr = function (type: "pushState" | "replaceState" | "back" | "forward" | "go") {
-    const orig = window.history[type];
+	const orig = window.history[type];
 
-    if (type === "back" || type === "forward") {
-        return function () {
-            const rv = orig.apply(window.history, [] as any);
-            historyCurrentIndex += type === "back" ? -1 : 1;
-            return rv;
-        };
-    } else if (type === "go") {
-        return function (delta: number) {
-            const rv = orig.apply(window.history, [delta] as any);
-            historyCurrentIndex += delta;
-            const e = new PopStateEvent("popstate", {
-                state: { ...window.history.state, hash: generateUniqueHash(8) },
-            });
-            window.dispatchEvent(e);
-            return rv;
-        };
-    }
+	if (type === "back" || type === "forward") {
+		return function () {
+			const rv = orig.apply(window.history, [] as any);
+			historyCurrentIndex += type === "back" ? -1 : 1;
+			return rv;
+		};
+	} else if (type === "go") {
+		return function (delta: number) {
+			const rv = orig.apply(window.history, [delta] as any);
+			historyCurrentIndex += delta;
+			const e = new PopStateEvent("popstate", {
+				state: { ...window.history.state, hash: generateUniqueHash(8) },
+			});
+			window.dispatchEvent(e);
+			return rv;
+		};
+	}
 
-    return function (state: any, title: any, url: any) {
-        const rv = orig.apply(window.history, [state, title, url]);
-        historyLength += type === "pushState" ? 1 : 0;
-        historyCurrentIndex += type === "pushState" ? 1 : 0;
-        const e = new PopStateEvent("popstate", {
-            state: { ...state, hash: generateUniqueHash(8) },
-        });
-        window.dispatchEvent(e);
-        return rv;
-    };
+	return function (state: any, title: any, url: any) {
+		const rv = orig.apply(window.history, [state, title, url]);
+		historyLength += type === "pushState" ? 1 : 0;
+		historyCurrentIndex += type === "pushState" ? 1 : 0;
+		const e = new PopStateEvent("popstate", {
+			state: { ...state, hash: generateUniqueHash(8) },
+		});
+		window.dispatchEvent(e);
+		return rv;
+	};
 };
 
 history.pushState = _wr("pushState");
@@ -337,78 +337,78 @@ history.go = _wr("go") as any;
  * };
  */
 export const useRouter = (path: string | string[] | RegExp | RegExp[] = "") => {
-    const [pathname, setPathname] = useState<string>(normalizePath(window.location.pathname));
-    const [search, setSearch] = useState<string>(window.location.search);
-    const [hash, setHash] = useState<string>(window.location.hash);
-    const [state, setState] = useState<any>(window.history.state ?? {});
-    const [query, setQuery] = useState<any>({});
-    const [length, setLength] = useState<number>(historyLength);
-    const [currentIndex, setCurrentIndex] = useState<number>(historyCurrentIndex);
+	const [pathname, setPathname] = useState<string>(normalizePath(window.location.pathname));
+	const [search, setSearch] = useState<string>(window.location.search);
+	const [hash, setHash] = useState<string>(window.location.hash);
+	const [state, setState] = useState<any>(window.history.state ?? {});
+	const [query, setQuery] = useState<any>({});
+	const [length, setLength] = useState<number>(historyLength);
+	const [currentIndex, setCurrentIndex] = useState<number>(historyCurrentIndex);
 
-    const updateInformatio = () => {
-        setPathname(normalizePath(window.location.pathname));
-        setSearch(window.location.search);
-        setHash(window.location.hash);
-        setState(window.history.state ?? {});
-        setLength(historyLength);
-        setCurrentIndex(historyCurrentIndex);
-        setQuery({
-            ...queryString.parse(window.location.search),
-            ...matchPath(path, window.location.pathname),
-            ...(window.history.state ?? {}),
-        });
-    };
+	const updateInformatio = () => {
+		setPathname(normalizePath(window.location.pathname));
+		setSearch(window.location.search);
+		setHash(window.location.hash);
+		setState(window.history.state ?? {});
+		setLength(historyLength);
+		setCurrentIndex(historyCurrentIndex);
+		setQuery({
+			...queryString.parse(window.location.search),
+			...matchPath(path, window.location.pathname),
+			...(window.history.state ?? {}),
+		});
+	};
 
-    useEffect(() => {
-        const handleRoute = () => {
-            updateInformatio();
-        };
+	useEffect(() => {
+		const handleRoute = () => {
+			updateInformatio();
+		};
 
-        window.addEventListener("popstate", handleRoute);
-        return () => {
-            window.removeEventListener("popstate", handleRoute);
-        };
-    }, [path]);
+		window.addEventListener("popstate", handleRoute);
+		return () => {
+			window.removeEventListener("popstate", handleRoute);
+		};
+	}, [path]);
 
-    const push = (url: string, state: any = {}) => {
-        history.pushState(state, "", url);
-        updateInformatio();
-    };
+	const push = (url: string, state: any = {}) => {
+		history.pushState(state, "", url);
+		updateInformatio();
+	};
 
-    const replace = (url: string, state: any = {}) => {
-        history.replaceState(state, "", url);
-        updateInformatio();
-    };
+	const replace = (url: string, state: any = {}) => {
+		history.replaceState(state, "", url);
+		updateInformatio();
+	};
 
-    const go = (delta: number) => {
-        history.go(delta);
-        updateInformatio();
-    };
+	const go = (delta: number) => {
+		history.go(delta);
+		updateInformatio();
+	};
 
-    const back = () => {
-        history.back();
-        updateInformatio();
-    };
+	const back = () => {
+		history.back();
+		updateInformatio();
+	};
 
-    const forward = () => {
-        history.forward();
-        updateInformatio();
-    };
+	const forward = () => {
+		history.forward();
+		updateInformatio();
+	};
 
-    return {
-        go,
-        back,
-        forward,
-        push,
-        replace,
-        state,
-        hash,
-        pathname,
-        query,
-        search,
-        length,
-        currentIndex,
-    };
+	return {
+		go,
+		back,
+		forward,
+		push,
+		replace,
+		state,
+		hash,
+		pathname,
+		query,
+		search,
+		length,
+		currentIndex,
+	};
 };
 
 /**
@@ -430,25 +430,25 @@ export const useRouter = (path: string | string[] | RegExp | RegExp[] = "") => {
  * };
  */
 export const useEventListener = <E extends HTMLElement, K extends keyof GlobalEventHandlersEventMap>(
-    element: React.RefObject<E | null>,
-    eventName: K,
-    eventHandler: (event: GlobalEventHandlersEventMap[K]) => void,
-    wantsUntrusted: boolean = false
+	element: React.RefObject<E | null>,
+	eventName: K,
+	eventHandler: (event: GlobalEventHandlersEventMap[K]) => void,
+	wantsUntrusted: boolean = false,
 ) => {
-    useEffect(() => {
-        if (!(element.current && element.current.addEventListener)) return;
-        const actualName = eventName;
+	useEffect(() => {
+		if (!(element.current && element.current.addEventListener)) return;
+		const actualName = eventName;
 
-        const eventListener = (event: GlobalEventHandlersEventMap[K]) => {
-            if (typeof eventHandler === "function") eventHandler(event);
-        };
+		const eventListener = (event: GlobalEventHandlersEventMap[K]) => {
+			if (typeof eventHandler === "function") eventHandler(event);
+		};
 
-        element.current.addEventListener(actualName, eventListener, wantsUntrusted);
+		element.current.addEventListener(actualName, eventListener, wantsUntrusted);
 
-        return () => {
-            element.current?.removeEventListener(actualName, eventListener, wantsUntrusted);
-        };
-    }, [eventName, element.current, eventHandler, wantsUntrusted]);
+		return () => {
+			element.current?.removeEventListener(actualName, eventListener, wantsUntrusted);
+		};
+	}, [eventName, element.current, eventHandler, wantsUntrusted]);
 };
 
 /**
@@ -473,26 +473,26 @@ export const useEventListener = <E extends HTMLElement, K extends keyof GlobalEv
  * @see https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries
  */
 export const useMediaQuery = <T = any>(queries: { [query: string]: T }, defaultValue: T) => {
-    const mediaQueryLists = Object.keys(queries).map((q) => window.matchMedia(q));
-    const getValue = () => {
-        const { media = "" } = mediaQueryLists.find((mql) => mql.matches) ?? {};
-        return typeof queries[media] !== "undefined" ? queries[media] : defaultValue;
-    };
+	const mediaQueryLists = Object.keys(queries).map((q) => window.matchMedia(q));
+	const getValue = () => {
+		const { media = "" } = mediaQueryLists.find((mql) => mql.matches) ?? {};
+		return typeof queries[media] !== "undefined" ? queries[media] : defaultValue;
+	};
 
-    const [value, setValue] = useState(getValue);
+	const [value, setValue] = useState(getValue);
 
-    useEffect(() => {
-        const handler = () => setValue(getValue);
-        mediaQueryLists.forEach((mql) => (mql.onchange = handler));
-    }, []);
+	useEffect(() => {
+		const handler = () => setValue(getValue);
+		mediaQueryLists.forEach((mql) => (mql.onchange = handler));
+	}, []);
 
-    return value;
+	return value;
 };
 
 interface HistoryState {
-    past: Array<any | null | undefined>;
-    present: any | null | undefined;
-    future: Array<any | null | undefined>;
+	past: Array<any | null | undefined>;
+	present: any | null | undefined;
+	future: Array<any | null | undefined>;
 }
 
 /**
@@ -515,66 +515,66 @@ interface HistoryState {
  * };
  */
 export const useStateHistory = <T = any>(initialPresent: T) => {
-    const [state, setState] = useState<HistoryState>({
-        past: [],
-        present: initialPresent,
-        future: [],
-    });
+	const [state, setState] = useState<HistoryState>({
+		past: [],
+		present: initialPresent,
+		future: [],
+	});
 
-    const canUndo = state.past.length !== 0;
-    const canRedo = state.future.length !== 0;
+	const canUndo = state.past.length !== 0;
+	const canRedo = state.future.length !== 0;
 
-    const undo = () => {
-        const previous = state.past[state.past.length - 1];
-        const newPast = state.past.slice(0, state.past.length - 1);
-        setState(({ future, past, present }) => {
-            return {
-                past: newPast,
-                present: previous,
-                future: [present, ...future],
-            };
-        });
-    };
+	const undo = () => {
+		const previous = state.past[state.past.length - 1];
+		const newPast = state.past.slice(0, state.past.length - 1);
+		setState(({ future, past, present }) => {
+			return {
+				past: newPast,
+				present: previous,
+				future: [present, ...future],
+			};
+		});
+	};
 
-    const redo = () => {
-        if (canRedo) {
-            const next = state.future[0];
-            const newFuture = state.future.slice(1);
-            setState(({ future, past, present }) => {
-                return {
-                    past: [...past, present],
-                    present: next,
-                    future: newFuture,
-                };
-            });
-        }
-    };
+	const redo = () => {
+		if (canRedo) {
+			const next = state.future[0];
+			const newFuture = state.future.slice(1);
+			setState(({ future, past, present }) => {
+				return {
+					past: [...past, present],
+					present: next,
+					future: newFuture,
+				};
+			});
+		}
+	};
 
-    const set = (newPresent: T) => {
-        if (newPresent === state.present) {
-            return;
-        }
-        setState(({ future, past, present }) => {
-            return {
-                past: [...past, present],
-                present: newPresent,
-                future: [],
-            };
-        });
-    };
+	const set = (newPresent: T) => {
+		if (newPresent === state.present) {
+			return;
+		}
+		setState(({ future, past, present }) => {
+			return {
+				past: [...past, present],
+				present: newPresent,
+				future: [],
+			};
+		});
+	};
 
-    const clear = () => {
-        setState(({ future, past, present }) => {
-            return {
-                past: [],
-                present: initialPresent,
-                future: [],
-            };
-        });
-    };
+	const clear = () => {
+		setState(({ future, past, present }) => {
+			return {
+				past: [],
+				present: initialPresent,
+				future: [],
+			};
+		});
+	};
 
-    // If needed we could also return past and future state
-    return { state: state.present as T, set, undo, redo, clear, canUndo, canRedo };
+	// If needed we could also return past and future state
+	return { state: state.present as T, set, undo, redo, clear, canUndo, canRedo };
 };
 
 /**
@@ -592,46 +592,46 @@ export const useStateHistory = <T = any>(initialPresent: T) => {
  * };
  */
 export const useScript = (src: string) => {
-    const [status, setStatus] = useState<string>(src ? "loading" : "idle");
+	const [status, setStatus] = useState<string>(src ? "loading" : "idle");
 
-    useEffect(() => {
-        if (!src) {
-            setStatus("idle");
-            return;
-        }
+	useEffect(() => {
+		if (!src) {
+			setStatus("idle");
+			return;
+		}
 
-        let script: HTMLScriptElement = document.querySelector(`script[src="${src}"]`) as HTMLScriptElement;
-        if (!script) {
-            script = document.createElement("script") as HTMLScriptElement;
-            script.src = src;
-            script.async = true;
-            script.setAttribute("data-status", "loading");
-            document.body.appendChild(script);
-            const setAttributeFromEvent = (event: Event) => {
-                script.setAttribute("data-status", event.type === "load" ? "ready" : "error");
-            };
-            script.addEventListener("load", setAttributeFromEvent);
-            script.addEventListener("error", setAttributeFromEvent);
-        } else {
-            setStatus((p) => script?.getAttribute("data-status") ?? p);
-        }
+		let script: HTMLScriptElement = document.querySelector(`script[src="${src}"]`) as HTMLScriptElement;
+		if (!script) {
+			script = document.createElement("script") as HTMLScriptElement;
+			script.src = src;
+			script.async = true;
+			script.setAttribute("data-status", "loading");
+			document.body.appendChild(script);
+			const setAttributeFromEvent = (event: Event) => {
+				script.setAttribute("data-status", event.type === "load" ? "ready" : "error");
+			};
+			script.addEventListener("load", setAttributeFromEvent);
+			script.addEventListener("error", setAttributeFromEvent);
+		} else {
+			setStatus((p) => script?.getAttribute("data-status") ?? p);
+		}
 
-        const setStateFromEvent = (event: Event) => {
-            setStatus(event.type === "load" ? "ready" : "error");
-        };
+		const setStateFromEvent = (event: Event) => {
+			setStatus(event.type === "load" ? "ready" : "error");
+		};
 
-        script.addEventListener("load", setStateFromEvent);
-        script.addEventListener("error", setStateFromEvent);
+		script.addEventListener("load", setStateFromEvent);
+		script.addEventListener("error", setStateFromEvent);
 
-        return () => {
-            if (script) {
-                script.removeEventListener("load", setStateFromEvent);
-                script.removeEventListener("error", setStateFromEvent);
-            }
-        };
-    }, [src]);
+		return () => {
+			if (script) {
+				script.removeEventListener("load", setStateFromEvent);
+				script.removeEventListener("error", setStateFromEvent);
+			}
+		};
+	}, [src]);
 
-    return status as "idle" | "loading" | "ready" | "error";
+	return status as "idle" | "loading" | "ready" | "error";
 };
 
 /**
@@ -647,27 +647,27 @@ export const useScript = (src: string) => {
  * };
  */
 export const useKeyPress = (targetKey: KeyboardEvent["key"], handler: (pressed: boolean) => void) => {
-    const downHandler = ({ key }: KeyboardEvent) => {
-        if (key === targetKey) {
-            handler(true);
-        }
-    };
+	const downHandler = ({ key }: KeyboardEvent) => {
+		if (key === targetKey) {
+			handler(true);
+		}
+	};
 
-    const upHandler = ({ key }: KeyboardEvent) => {
-        if (key === targetKey) {
-            handler(false);
-        }
-    };
+	const upHandler = ({ key }: KeyboardEvent) => {
+		if (key === targetKey) {
+			handler(false);
+		}
+	};
 
-    useEffect(() => {
-        window.addEventListener("keydown", downHandler);
-        window.addEventListener("keyup", upHandler);
+	useEffect(() => {
+		window.addEventListener("keydown", downHandler);
+		window.addEventListener("keyup", upHandler);
 
-        return () => {
-            window.removeEventListener("keydown", downHandler);
-            window.removeEventListener("keyup", upHandler);
-        };
-    }, []);
+		return () => {
+			window.removeEventListener("keydown", downHandler);
+			window.removeEventListener("keyup", upHandler);
+		};
+	}, []);
 };
 
 /**
@@ -684,26 +684,26 @@ export const useKeyPress = (targetKey: KeyboardEvent["key"], handler: (pressed: 
  * };
  */
 export const useOnScreen = <T extends HTMLElement>(ref: React.MutableRefObject<T>, rootMargin: string = "0px") => {
-    const [isIntersecting, setIntersecting] = useState(false);
+	const [isIntersecting, setIntersecting] = useState(false);
 
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                setIntersecting(entry.isIntersecting);
-            },
-            { rootMargin }
-        );
+	useEffect(() => {
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				setIntersecting(entry.isIntersecting);
+			},
+			{ rootMargin },
+		);
 
-        if (ref.current) {
-            observer.observe(ref.current as any);
-        }
+		if (ref.current) {
+			observer.observe(ref.current as any);
+		}
 
-        return () => {
-            observer.unobserve(ref.current as any);
-        };
-    }, []);
+		return () => {
+			observer.unobserve(ref.current as any);
+		};
+	}, []);
 
-    return isIntersecting;
+	return isIntersecting;
 };
 
 /**
@@ -725,24 +725,24 @@ export const useOnScreen = <T extends HTMLElement>(ref: React.MutableRefObject<T
  * };
  */
 export const usePrevious = <T = any>(value: T) => {
-    const [state, setState] = useState<{
-        previous: T | undefined;
-        actual: T | undefined;
-    }>({
-        previous: undefined,
-        actual: value,
-    });
+	const [state, setState] = useState<{
+		previous: T | undefined;
+		actual: T | undefined;
+	}>({
+		previous: undefined,
+		actual: value,
+	});
 
-    useEffect(() => {
-        setState(({ actual }) => {
-            return {
-                previous: actual,
-                actual: value,
-            };
-        });
-    }, [value]);
+	useEffect(() => {
+		setState(({ actual }) => {
+			return {
+				previous: actual,
+				actual: value,
+			};
+		});
+	}, [value]);
 
-    return state.previous;
+	return state.previous;
 };
 
 /**
@@ -760,43 +760,43 @@ export const usePrevious = <T = any>(value: T) => {
  * };
  */
 export const useOnClickOutside = <T extends HTMLElement>(ref: React.MutableRefObject<T>, handler: (clickedOutside: boolean) => void) => {
-    useEffect(() => {
-        const listener = (event: Event) => {
-            if (!ref.current || (ref.current as any).contains(event.target)) {
-                return;
-            }
-            handler(true);
-        };
+	useEffect(() => {
+		const listener = (event: Event) => {
+			if (!ref.current || (ref.current as any).contains(event.target)) {
+				return;
+			}
+			handler(true);
+		};
 
-        document.addEventListener("mousedown", listener);
-        document.addEventListener("touchstart", listener);
+		document.addEventListener("mousedown", listener);
+		document.addEventListener("touchstart", listener);
 
-        return () => {
-            document.removeEventListener("mousedown", listener);
-            document.removeEventListener("touchstart", listener);
-        };
-    }, [ref, handler]);
+		return () => {
+			document.removeEventListener("mousedown", listener);
+			document.removeEventListener("touchstart", listener);
+		};
+	}, [ref, handler]);
 };
 
 export const useHover = <T extends HTMLElement>(ref: React.MutableRefObject<T>): [React.MutableRefObject<T | null>, boolean] => {
-    const [value, setValue] = useState<boolean>(false);
+	const [value, setValue] = useState<boolean>(false);
 
-    const handleMouseOver = () => setValue(true);
-    const handleMouseOut = () => setValue(false);
+	const handleMouseOver = () => setValue(true);
+	const handleMouseOut = () => setValue(false);
 
-    useEffect(() => {
-        const node = ref.current;
-        if (node) {
-            (node as any).addEventListener("mouseover", handleMouseOver);
-            (node as any).addEventListener("mouseout", handleMouseOut);
-            return () => {
-                (node as any).removeEventListener("mouseover", handleMouseOver);
-                (node as any).removeEventListener("mouseout", handleMouseOut);
-            };
-        }
-    }, [ref.current]);
+	useEffect(() => {
+		const node = ref.current;
+		if (node) {
+			(node as any).addEventListener("mouseover", handleMouseOver);
+			(node as any).addEventListener("mouseout", handleMouseOut);
+			return () => {
+				(node as any).removeEventListener("mouseover", handleMouseOver);
+				(node as any).removeEventListener("mouseout", handleMouseOut);
+			};
+		}
+	}, [ref.current]);
 
-    return [ref, value];
+	return [ref, value];
 };
 
 /**
@@ -812,36 +812,36 @@ export const useHover = <T extends HTMLElement>(ref: React.MutableRefObject<T>):
  * };
  */
 export const useCounterTimer = (delay: number = 0, duration: number = 1000, delayFrame: number = 0) => {
-    const [elapsed, setTime] = useState(0);
+	const [elapsed, setTime] = useState(0);
 
-    useEffect(() => {
-        let interval: number,
-            current = Date.now(),
-            count = 0;
-        setTime(0);
+	useEffect(() => {
+		let interval: NodeJS.Timer,
+			current = Date.now(),
+			count = 0;
+		setTime(0);
 
-        const timerDelay = setTimeout(() => {
-            current = Date.now();
-            interval = setInterval(() => {
-                if (count >= duration) {
-                    clearInterval(interval);
-                    return;
-                }
+		const timerDelay = setTimeout(() => {
+			current = Date.now();
+			interval = setInterval(() => {
+				if (count >= duration) {
+					clearInterval(interval);
+					return;
+				}
 
-                const now = Date.now();
-                count += now - current;
-                current = now;
-                setTime(count);
-            }, delayFrame);
-        }, delay);
+				const now = Date.now();
+				count += now - current;
+				current = now;
+				setTime(count);
+			}, delayFrame);
+		}, delay);
 
-        return () => {
-            clearTimeout(timerDelay);
-            clearInterval(interval);
-        };
-    }, [delay, duration, delayFrame]);
+		return () => {
+			clearTimeout(timerDelay);
+			clearInterval(interval);
+		};
+	}, [delay, duration, delayFrame]);
 
-    return elapsed;
+	return elapsed;
 };
 
 /**
@@ -858,144 +858,144 @@ export const useCounterTimer = (delay: number = 0, duration: number = 1000, dela
  * };
  */
 export const useBezierEasing = (
-    easing:
-        | [number, number, number, number]
-        | [[number, number], [number, number]]
-        | "linear"
-        | "elastic"
-        | "ease"
-        | "ease-in"
-        | "ease-in-elastic"
-        | "ease-in-bounce"
-        | "ease-in-expo"
-        | "ease-in-sine"
-        | "ease-in-quad"
-        | "ease-in-cubic"
-        | "ease-in-back"
-        | "ease-in-quart"
-        | "ease-in-quint"
-        | "ease-in-circ"
-        | "ease-in-out"
-        | "ease-in-out-elastic"
-        | "ease-in-out-bounce"
-        | "ease-in-out-sine"
-        | "ease-in-out-quad"
-        | "ease-in-out-cubic"
-        | "ease-in-out-back"
-        | "ease-in-out-quart"
-        | "ease-in-out-quint"
-        | "ease-in-out-expo"
-        | "ease-in-out-circ"
-        | "ease-out"
-        | "ease-out-elastic"
-        | "ease-out-bounce"
-        | "ease-out-sine"
-        | "ease-out-quad"
-        | "ease-out-cubic"
-        | "ease-out-back"
-        | "ease-out-quart"
-        | "ease-out-quint"
-        | "ease-out-expo"
-        | "ease-out-circ"
-        | "fast-out-slow-in"
-        | "fast-out-linear-in"
-        | "linear-out-slow-in" = "linear",
-    delay: number = 0,
-    duration: number = 500,
-    delayFrame: number = 0
+	easing:
+		| [number, number, number, number]
+		| [[number, number], [number, number]]
+		| "linear"
+		| "elastic"
+		| "ease"
+		| "ease-in"
+		| "ease-in-elastic"
+		| "ease-in-bounce"
+		| "ease-in-expo"
+		| "ease-in-sine"
+		| "ease-in-quad"
+		| "ease-in-cubic"
+		| "ease-in-back"
+		| "ease-in-quart"
+		| "ease-in-quint"
+		| "ease-in-circ"
+		| "ease-in-out"
+		| "ease-in-out-elastic"
+		| "ease-in-out-bounce"
+		| "ease-in-out-sine"
+		| "ease-in-out-quad"
+		| "ease-in-out-cubic"
+		| "ease-in-out-back"
+		| "ease-in-out-quart"
+		| "ease-in-out-quint"
+		| "ease-in-out-expo"
+		| "ease-in-out-circ"
+		| "ease-out"
+		| "ease-out-elastic"
+		| "ease-out-bounce"
+		| "ease-out-sine"
+		| "ease-out-quad"
+		| "ease-out-cubic"
+		| "ease-out-back"
+		| "ease-out-quart"
+		| "ease-out-quint"
+		| "ease-out-expo"
+		| "ease-out-circ"
+		| "fast-out-slow-in"
+		| "fast-out-linear-in"
+		| "linear-out-slow-in" = "linear",
+	delay: number = 0,
+	duration: number = 500,
+	delayFrame: number = 0,
 ) => {
-    const elastic = (x: number) => {
-        return x * (33 * x * x * x * x - 106 * x * x * x + 126 * x * x - 67 * x + 15);
-    };
+	const elastic = (x: number) => {
+		return x * (33 * x * x * x * x - 106 * x * x * x + 126 * x * x - 67 * x + 15);
+	};
 
-    const easeInElastic = (x: number) => {
-        const c4 = (2 * Math.PI) / 3;
-        return x === 0 ? 0 : x === 1 ? 1 : -Math.pow(2, 10 * x - 10) * Math.sin((x * 10 - 10.75) * c4);
-    };
+	const easeInElastic = (x: number) => {
+		const c4 = (2 * Math.PI) / 3;
+		return x === 0 ? 0 : x === 1 ? 1 : -Math.pow(2, 10 * x - 10) * Math.sin((x * 10 - 10.75) * c4);
+	};
 
-    const easeInOutElastic = (x: number) => {
-        const c5 = (2 * Math.PI) / 4.5;
-        return x === 0 ? 0 : x === 1 ? 1 : x < 0.5 ? -(Math.pow(2, 20 * x - 10) * Math.sin((20 * x - 11.125) * c5)) / 2 : (Math.pow(2, -20 * x + 10) * Math.sin((20 * x - 11.125) * c5)) / 2 + 1;
-    };
+	const easeInOutElastic = (x: number) => {
+		const c5 = (2 * Math.PI) / 4.5;
+		return x === 0 ? 0 : x === 1 ? 1 : x < 0.5 ? -(Math.pow(2, 20 * x - 10) * Math.sin((20 * x - 11.125) * c5)) / 2 : (Math.pow(2, -20 * x + 10) * Math.sin((20 * x - 11.125) * c5)) / 2 + 1;
+	};
 
-    const easeOutElastic = (x: number) => {
-        const c4 = (2 * Math.PI) / 3;
-        return x === 0 ? 0 : x === 1 ? 1 : Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * c4) + 1;
-    };
+	const easeOutElastic = (x: number) => {
+		const c4 = (2 * Math.PI) / 3;
+		return x === 0 ? 0 : x === 1 ? 1 : Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * c4) + 1;
+	};
 
-    const easeOutBounce = (x: number) => {
-        const n1 = 7.5625;
-        const d1 = 2.75;
-        return x < 1 / d1 ? n1 * x * x : x < 2 / d1 ? n1 * (x -= 1.5 / d1) * x + 0.75 : x < 2.5 / d1 ? n1 * (x -= 2.25 / d1) * x + 0.9375 : n1 * (x -= 2.625 / d1) * x + 0.984375;
-    };
+	const easeOutBounce = (x: number) => {
+		const n1 = 7.5625;
+		const d1 = 2.75;
+		return x < 1 / d1 ? n1 * x * x : x < 2 / d1 ? n1 * (x -= 1.5 / d1) * x + 0.75 : x < 2.5 / d1 ? n1 * (x -= 2.25 / d1) * x + 0.9375 : n1 * (x -= 2.625 / d1) * x + 0.984375;
+	};
 
-    const easeInBounce = (x: number) => {
-        return 1 - easeOutBounce(1 - x);
-    };
+	const easeInBounce = (x: number) => {
+		return 1 - easeOutBounce(1 - x);
+	};
 
-    const easeInOutBounce = (x: number) => {
-        return x < 0.5 ? (1 - easeOutBounce(1 - 2 * x)) / 2 : (1 + easeOutBounce(2 * x - 1)) / 2;
-    };
+	const easeInOutBounce = (x: number) => {
+		return x < 0.5 ? (1 - easeOutBounce(1 - 2 * x)) / 2 : (1 + easeOutBounce(2 * x - 1)) / 2;
+	};
 
-    const easingList = {
-        linear: (n: number) => n,
-        elastic: elastic,
-        ease: bezierEasing(0.25, 0.1, 0.25, 1.0),
-        "ease-in": bezierEasing(0.42, 0.0, 1.0, 1.0),
-        "ease-in-elastic": easeInElastic,
-        "ease-in-bounce": easeInBounce,
-        "ease-in-expo": bezierEasing(0.95, 0.05, 0.795, 0.035),
-        "ease-in-sine": bezierEasing(0.47, 0, 0.75, 0.72),
-        "ease-in-quad": bezierEasing(0.55, 0.09, 0.68, 0.53),
-        "ease-in-cubic": bezierEasing(0.55, 0.06, 0.68, 0.19),
-        "ease-in-back": bezierEasing(0.6, -0.28, 0.74, 0.05),
-        "ease-in-quart": bezierEasing(0.895, 0.03, 0.685, 0.22),
-        "ease-in-quint": bezierEasing(0.755, 0.05, 0.855, 0.06),
-        "ease-in-circ": bezierEasing(0.6, 0.04, 0.98, 0.335),
-        "ease-in-out": bezierEasing(0.42, 0.0, 0.58, 1.0),
-        "ease-in-out-elastic": easeInOutElastic,
-        "ease-in-out-bounce": easeInOutBounce,
-        "ease-in-out-sine": bezierEasing(0.45, 0.05, 0.55, 0.95),
-        "ease-in-out-quad": bezierEasing(0.46, 0.03, 0.52, 0.96),
-        "ease-in-out-cubic": bezierEasing(0.65, 0.05, 0.36, 1),
-        "ease-in-out-back": bezierEasing(0.68, -0.55, 0.27, 1.55),
-        "ease-in-out-quart": bezierEasing(0.77, 0, 0.175, 1),
-        "ease-in-out-quint": bezierEasing(0.86, 0, 0.07, 1),
-        "ease-in-out-expo": bezierEasing(1, 0, 0, 1),
-        "ease-in-out-circ": bezierEasing(0.785, 0.135, 0.15, 0.86),
-        "ease-out": bezierEasing(0.0, 0.0, 0.58, 1.0),
-        "ease-out-elastic": easeOutElastic,
-        "ease-out-bounce": easeOutBounce,
-        "ease-out-sine": bezierEasing(0.39, 0.58, 0.57, 1),
-        "ease-out-quad": bezierEasing(0.25, 0.46, 0.45, 0.94),
-        "ease-out-cubic": bezierEasing(0.22, 0.61, 0.36, 1),
-        "ease-out-back": bezierEasing(0.18, 0.89, 0.32, 1.28),
-        "ease-out-quart": bezierEasing(0.165, 0.84, 0.44, 1),
-        "ease-out-quint": bezierEasing(0.23, 1, 0.32, 1),
-        "ease-out-expo": bezierEasing(0.19, 1, 0.22, 1),
-        "ease-out-circ": bezierEasing(0.075, 0.82, 0.165, 1),
-        "fast-out-slow-in": bezierEasing(0.4, 0, 0.2, 1),
-        "fast-out-linear-in": bezierEasing(0.4, 0, 1, 1),
-        "linear-out-slow-in": bezierEasing(0, 0, 0.2, 1),
-    };
+	const easingList = {
+		"linear": (n: number) => n,
+		"elastic": elastic,
+		"ease": bezierEasing(0.25, 0.1, 0.25, 1.0),
+		"ease-in": bezierEasing(0.42, 0.0, 1.0, 1.0),
+		"ease-in-elastic": easeInElastic,
+		"ease-in-bounce": easeInBounce,
+		"ease-in-expo": bezierEasing(0.95, 0.05, 0.795, 0.035),
+		"ease-in-sine": bezierEasing(0.47, 0, 0.75, 0.72),
+		"ease-in-quad": bezierEasing(0.55, 0.09, 0.68, 0.53),
+		"ease-in-cubic": bezierEasing(0.55, 0.06, 0.68, 0.19),
+		"ease-in-back": bezierEasing(0.6, -0.28, 0.74, 0.05),
+		"ease-in-quart": bezierEasing(0.895, 0.03, 0.685, 0.22),
+		"ease-in-quint": bezierEasing(0.755, 0.05, 0.855, 0.06),
+		"ease-in-circ": bezierEasing(0.6, 0.04, 0.98, 0.335),
+		"ease-in-out": bezierEasing(0.42, 0.0, 0.58, 1.0),
+		"ease-in-out-elastic": easeInOutElastic,
+		"ease-in-out-bounce": easeInOutBounce,
+		"ease-in-out-sine": bezierEasing(0.45, 0.05, 0.55, 0.95),
+		"ease-in-out-quad": bezierEasing(0.46, 0.03, 0.52, 0.96),
+		"ease-in-out-cubic": bezierEasing(0.65, 0.05, 0.36, 1),
+		"ease-in-out-back": bezierEasing(0.68, -0.55, 0.27, 1.55),
+		"ease-in-out-quart": bezierEasing(0.77, 0, 0.175, 1),
+		"ease-in-out-quint": bezierEasing(0.86, 0, 0.07, 1),
+		"ease-in-out-expo": bezierEasing(1, 0, 0, 1),
+		"ease-in-out-circ": bezierEasing(0.785, 0.135, 0.15, 0.86),
+		"ease-out": bezierEasing(0.0, 0.0, 0.58, 1.0),
+		"ease-out-elastic": easeOutElastic,
+		"ease-out-bounce": easeOutBounce,
+		"ease-out-sine": bezierEasing(0.39, 0.58, 0.57, 1),
+		"ease-out-quad": bezierEasing(0.25, 0.46, 0.45, 0.94),
+		"ease-out-cubic": bezierEasing(0.22, 0.61, 0.36, 1),
+		"ease-out-back": bezierEasing(0.18, 0.89, 0.32, 1.28),
+		"ease-out-quart": bezierEasing(0.165, 0.84, 0.44, 1),
+		"ease-out-quint": bezierEasing(0.23, 1, 0.32, 1),
+		"ease-out-expo": bezierEasing(0.19, 1, 0.22, 1),
+		"ease-out-circ": bezierEasing(0.075, 0.82, 0.165, 1),
+		"fast-out-slow-in": bezierEasing(0.4, 0, 0.2, 1),
+		"fast-out-linear-in": bezierEasing(0.4, 0, 1, 1),
+		"linear-out-slow-in": bezierEasing(0, 0, 0.2, 1),
+	};
 
-    if (Array.isArray(easing)) {
-        if (easing.every((n: any) => typeof n === "number") && easing.length >= 4) {
-            easing = bezierEasing.apply(null, easing as any) as any;
-        } else {
-            easing = (easing as any[]).filter((v: any) => Array.isArray(v) && v.every((n) => typeof n === "number") && v.length >= 2) as any;
-            easing = easing.length === 2 ? (bezierEasing.apply(null, Array.prototype.concat(easing[0].slice(0, 2), easing[1].slice(0, 2)) as any) as any) : "linear";
-        }
-    }
+	if (Array.isArray(easing)) {
+		if (easing.every((n: any) => typeof n === "number") && easing.length >= 4) {
+			easing = bezierEasing.apply(null, easing as any) as any;
+		} else {
+			easing = (easing as any[]).filter((v: any) => Array.isArray(v) && v.every((n) => typeof n === "number") && v.length >= 2) as any;
+			easing = easing.length === 2 ? (bezierEasing.apply(null, Array.prototype.concat(easing[0].slice(0, 2), easing[1].slice(0, 2)) as any) as any) : "linear";
+		}
+	}
 
-    if (typeof easing === "string") {
-        easing = (Object.keys(easingList).includes(easing) ? easingList[easing] : easingList["linear"]) as any;
-    }
+	if (typeof easing === "string") {
+		easing = (Object.keys(easingList).includes(easing) ? easingList[easing] : easingList["linear"]) as any;
+	}
 
-    const elapsed = useCounterTimer(delay, duration, delayFrame);
-    const x = Math.min(1, elapsed / duration);
+	const elapsed = useCounterTimer(delay, duration, delayFrame);
+	const x = Math.min(1, elapsed / duration);
 
-    return typeof easing === "function" ? (easing as any)(x) : x;
+	return typeof easing === "function" ? (easing as any)(x) : x;
 };
 
 /**
@@ -1020,36 +1020,36 @@ export const useBezierEasing = (
  * };
  */
 export const useLocalStorage = <T = any>(key: string, initialValue: T) => {
-    const [storedValue, __setStoredValue] = useState<T>(
-        ((): T => {
-            if (typeof window === "undefined") {
-                return initialValue;
-            }
-            try {
-                const { value } = JSON.parse(window.localStorage.getItem(key) ?? "{}") ?? {};
-                return value ?? initialValue;
-            } catch (error) {
-                return initialValue;
-            }
-        })()
-    );
+	const [storedValue, __setStoredValue] = useState<T>(
+		((): T => {
+			if (typeof window === "undefined") {
+				return initialValue;
+			}
+			try {
+				const { value } = JSON.parse(window.localStorage.getItem(key) ?? "{}") ?? {};
+				return value ?? initialValue;
+			} catch (error) {
+				return initialValue;
+			}
+		})(),
+	);
 
-    const setStoredValue = (value: T | ((velua: T) => T)) => {
-        try {
-            const valueToStore = JSON.stringify({ value: value instanceof Function ? value(storedValue) : value, time: Date.now() });
+	const setStoredValue = (value: T | ((velua: T) => T)) => {
+		try {
+			const valueToStore = JSON.stringify({ value: value instanceof Function ? value(storedValue) : value, time: Date.now() });
 
-            const { value: valueNow } = JSON.parse(valueToStore ?? "{}") ?? {};
+			const { value: valueNow } = JSON.parse(valueToStore ?? "{}") ?? {};
 
-            __setStoredValue(valueNow);
+			__setStoredValue(valueNow);
 
-            if (typeof window !== "undefined") {
-                window.localStorage.setItem(key, valueToStore);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-    return [storedValue, setStoredValue];
+			if (typeof window !== "undefined") {
+				window.localStorage.setItem(key, valueToStore);
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	};
+	return [storedValue, setStoredValue];
 };
 
 /**
@@ -1076,48 +1076,48 @@ export const useLocalStorage = <T = any>(key: string, initialValue: T) => {
  * };
  */
 export const useElementRect = <T extends HTMLElement>(
-    ref: React.MutableRefObject<T | null>
+	ref: React.MutableRefObject<T | null>,
 ): {
-    width: number;
-    height: number;
-    bottom: number;
-    top: number;
-    left: number;
-    right: number;
-    x: number;
-    y: number;
+	width: number;
+	height: number;
+	bottom: number;
+	top: number;
+	left: number;
+	right: number;
+	x: number;
+	y: number;
 } => {
-    const [rect, setRect] = useState<Omit<DOMRect, "toJSON">>({ width: 0, height: 0, bottom: 0, top: 0, left: 0, right: 0, x: 0, y: 0 });
+	const [rect, setRect] = useState<Omit<DOMRect, "toJSON">>({ width: 0, height: 0, bottom: 0, top: 0, left: 0, right: 0, x: 0, y: 0 });
 
-    useEffect(() => {
-        let time: number;
+	useEffect(() => {
+		let time: NodeJS.Timer;
 
-        const getSize = () => {
-            clearTimeout(time);
-            time = setTimeout(() => {
-                try {
-                    const { toJSON, ...rect } = ref.current?.getBoundingClientRect() ?? {
-                        width: 0,
-                        height: 0,
-                        bottom: 0,
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        x: 0,
-                        y: 0,
-                    };
-                    setRect(rect);
-                } catch (e) {}
-            }, 100);
-        };
+		const getSize = () => {
+			clearTimeout(time);
+			time = setTimeout(() => {
+				try {
+					const { toJSON, ...rect } = ref.current?.getBoundingClientRect() ?? {
+						width: 0,
+						height: 0,
+						bottom: 0,
+						top: 0,
+						left: 0,
+						right: 0,
+						x: 0,
+						y: 0,
+					};
+					setRect(rect);
+				} catch (e) {}
+			}, 100);
+		};
 
-        window.addEventListener("resize", getSize);
-        return () => {
-            window.removeEventListener("resize", getSize);
-        };
-    }, [ref.current]);
+		window.addEventListener("resize", getSize);
+		return () => {
+			window.removeEventListener("resize", getSize);
+		};
+	}, [ref.current]);
 
-    return rect;
+	return rect;
 };
 
 /**
@@ -1143,62 +1143,62 @@ export const useElementRect = <T extends HTMLElement>(
  * };
  */
 export const useFitText = <T extends HTMLElement, I extends HTMLElement>(
-    textRef: React.MutableRefObject<T | null>,
-    containerRef: React.MutableRefObject<I | null>,
-    minFontSize: number = 5,
-    maxFontSize: number = Infinity,
-    increment: number = 0
+	textRef: React.MutableRefObject<T | null>,
+	containerRef: React.MutableRefObject<I | null>,
+	minFontSize: number = 5,
+	maxFontSize: number = Infinity,
+	increment: number = 0,
 ) => {
-    const measureTextSize = (text: string, fontSize: number = 10): { width: number; height: number } => {
-        const phantomElement = document.createElement("div");
-        phantomElement.style.position = "absolute";
-        phantomElement.style.visibility = "hidden";
-        phantomElement.style.whiteSpace = "nowrap";
-        phantomElement.style.fontSize = `${fontSize}px`;
-        phantomElement.textContent = text;
+	const measureTextSize = (text: string, fontSize: number = 10): { width: number; height: number } => {
+		const phantomElement = document.createElement("div");
+		phantomElement.style.position = "absolute";
+		phantomElement.style.visibility = "hidden";
+		phantomElement.style.whiteSpace = "nowrap";
+		phantomElement.style.fontSize = `${fontSize}px`;
+		phantomElement.textContent = text;
 
-        document.body.appendChild(phantomElement);
+		document.body.appendChild(phantomElement);
 
-        const width = phantomElement.offsetWidth;
-        const height = phantomElement.offsetHeight;
+		const width = phantomElement.offsetWidth;
+		const height = phantomElement.offsetHeight;
 
-        document.body.removeChild(phantomElement);
+		document.body.removeChild(phantomElement);
 
-        return { width, height };
-    };
+		return { width, height };
+	};
 
-    useEffect(() => {
-        let frameNumber: number;
-        let timeNumber: number;
+	useEffect(() => {
+		let frameNumber: number;
+		let timeNumber: NodeJS.Timer;
 
-        const fitText = () => {
-            clearTimeout(timeNumber);
-            cancelAnimationFrame(frameNumber);
+		const fitText = () => {
+			clearTimeout(timeNumber);
+			cancelAnimationFrame(frameNumber);
 
-            if (containerRef.current && textRef.current) {
-                const initialFontSize = Math.max(10, minFontSize);
-                const { width: initialWidth } = measureTextSize((containerRef.current as any).innerText, initialFontSize);
+			if (containerRef.current && textRef.current) {
+				const initialFontSize = Math.max(10, minFontSize);
+				const { width: initialWidth } = measureTextSize((containerRef.current as any).innerText, initialFontSize);
 
-                const desiredWidth = (containerRef.current as any).clientWidth;
-                const fontIdeal = (initialFontSize / initialWidth) * desiredWidth;
-                const incr = 1 + increment;
-                const fontSize = Math.max(Math.min(Math.round(fontIdeal * incr), maxFontSize), minFontSize);
+				const desiredWidth = (containerRef.current as any).clientWidth;
+				const fontIdeal = (initialFontSize / initialWidth) * desiredWidth;
+				const incr = 1 + increment;
+				const fontSize = Math.max(Math.min(Math.round(fontIdeal * incr), maxFontSize), minFontSize);
 
-                (textRef.current as any).style.fontSize = `${fontSize}px`;
-            }
+				(textRef.current as any).style.fontSize = `${fontSize}px`;
+			}
 
-            timeNumber = setTimeout(() => {
-                frameNumber = requestAnimationFrame(fitText);
-            }, 200);
-        };
+			timeNumber = setTimeout(() => {
+				frameNumber = requestAnimationFrame(fitText);
+			}, 200);
+		};
 
-        fitText();
-        window.addEventListener("resize", fitText);
+		fitText();
+		window.addEventListener("resize", fitText);
 
-        return () => {
-            clearTimeout(timeNumber);
-            cancelAnimationFrame(frameNumber);
-            window.removeEventListener("resize", fitText);
-        };
-    }, [minFontSize, maxFontSize]);
+		return () => {
+			clearTimeout(timeNumber);
+			cancelAnimationFrame(frameNumber);
+			window.removeEventListener("resize", fitText);
+		};
+	}, [minFontSize, maxFontSize]);
 };

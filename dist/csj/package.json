@@ -1,0 +1,6 @@
+{
+    "type": "commonjs",
+    "main": "E:/Desktop/Projetos/NPM-MODULES/react-use-utils/dist/cjs/index.js",
+    "module": "E:/Desktop/Projetos/NPM-MODULES/react-use-utils/dist/esm/index.js",
+    "types": "../types/index.d.ts"
+}
