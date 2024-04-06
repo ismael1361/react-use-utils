@@ -367,7 +367,7 @@ useRouter(path?: string | string[] | RegExp | RegExp[]): {
 
 Hook que retorna informações sobre a rota atual e funções para navegar entre as rotas.
 
-- `path`: Caminho da rota.
+- `path`: Caminho da rota de referência. Útil para ferificar se a rota atual corresponde a um caminho específico. Se for um array, verifica se a rota atual corresponde a qualquer um dos caminhos no array. Se for uma expressão regular, verifica se a rota atual corresponde à expressão regular. Se for um array de expressões regulares, verifica se a rota atual corresponde a qualquer uma das expressões regulares no array.
 - `go`: Navega para uma rota específica.
 - `back`: Navega para a rota anterior.
 - `forward`: Navega para a próxima rota.
@@ -377,6 +377,13 @@ Hook que retorna informações sobre a rota atual e funções para navegar entre
 - `hash`: Hash da rota.
 - `pathname`: Caminho da rota.
 - `query`: Query string da rota.
+  - `exact`: Se `true`, a rota atual corresponde exatamente ao caminho de referência.
+  - `params`: Parâmetros da rota.
+  - `search`: Parâmetros da query string.
+  - `query`: Junção dos parâmetros da rota e da query string.
+  - `path`: Caminho da rota de referência válida.
+  - `pathValid`: Rota de referência válida.
+  - `...`: Parâmetros da rota e derivados.
 - `search`: Parâmetros da query string.
 - `length`: Número de rotas no histórico.
 - `currentIndex`: Índice da rota atual.

@@ -52,6 +52,8 @@ export const matchPath = (
 		[key: string]: string;
 	};
 	query: any;
+	path: string | undefined;
+	pathValid: string | RegExp | undefined;
 } => {
 	path = typeof path === "string" ? normalizePath(path) : Array.isArray(path) ? path.map((p) => (typeof path === "string" ? normalizePath(path) : p)) : path;
 	url = normalizePath(url);
@@ -109,7 +111,7 @@ export const matchPath = (
 	const matches = pathValid instanceof RegExp ? !!match : !!match && match[0] === match.input;
 	const params = match ? match.groups || {} : {};
 	const search = getQuery(urlParsed?.search ?? "");
-	return { exact: matches, search, params, query: Object.assign({}, params, search) };
+	return { exact: matches, search, params, query: Object.assign({}, params, search), path: matches ? urlParsed?.pathname : undefined, pathValid };
 };
 
 /**
