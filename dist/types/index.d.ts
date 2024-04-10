@@ -1,5 +1,48 @@
 import React from "react";
 /**
+ * @description Hook que permite atualizar a IU de maneira otimista.
+ * @template T Tipo do estado
+ * @template V Tipo do valor otimista
+ * @param {T} state Estado atual
+ * @param {(currentState: T, optimisticValue: V) => T} updateFn Função de atualização
+ * @returns {[T, function]} Estado otimista e função de adição otimista
+ * @example
+ * const App = () => {
+ *  const [messages, setMessages] = useState([]);
+ *
+ *  const [optimisticMessages, addOptimisticMessage] = useOptimistic(
+ *      messages,
+ *      (currentState, optimisticValue) => {
+ *          return [...currentState, {...optimisticValue, sending: true}];
+ *      }
+ *  );
+ *
+ *  const handleClick = () => {
+ *      const id = uniqueid(16);
+ *      addOptimisticMessage({id, text: "Nova mensagem"});
+ *      fetch("https://api.example.com/messages", {
+ *          method: "POST",
+ *          body: JSON.stringify({id, text: "Nova mensagem"}),
+ *          headers: {
+ *              "Content-Type": "application/json",
+ *          },
+ *      });
+ *  };
+ *
+ *  return (
+ *      <div>
+ *          <ul>
+ *              {optimisticMessages.map((message) => (
+ *                  <li key={message.id}>{message.text}</li>
+ *              ))}
+ *          </ul>
+ *          <button onClick={handleClick}>Adicionar mensagem</button>
+ *      </div>
+ *  );
+ * };
+ */
+export declare const useOptimistic: <T = any, V = any>(state: T, updateFn: (currentState: T, optimisticValue: V) => T) => [T, (value: V) => void];
+/**
  * @description Gancho para gerar um ID exclusivo
  * @param {string} [idName] Nome do ID (opcional)
  * @returns {string} ID exclusivo

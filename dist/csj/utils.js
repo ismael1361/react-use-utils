@@ -117,7 +117,9 @@ var matchPath = exports.matchPath = function matchPath(path, url) {
     exact: matches,
     search: search,
     params: params,
-    query: Object.assign({}, params, search)
+    query: Object.assign({}, params, search),
+    path: matches ? urlParsed === null || urlParsed === void 0 ? void 0 : urlParsed.pathname : undefined,
+    pathValid: pathValid
   };
 };
 /**

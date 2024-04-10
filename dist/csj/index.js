@@ -4,7 +4,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.useWindowSize = exports.useToggle = exports.useStateHistory = exports.useScript = exports.useRouter = exports.useProxy = exports.usePrevious = exports.useOnScreen = exports.useOnClickOutside = exports.useMediaQuery = exports.useLocalStorage = exports.useKeyPress = exports.useId = exports.useHover = exports.useFitText = exports.useEventListener = exports.useElementRect = exports.useDebounceCallbackEffect = exports.useDebounce = exports.useCounterTimer = exports.useBezierEasing = exports.useAsync = void 0;
+exports.useWindowSize = exports.useToggle = exports.useStateHistory = exports.useScript = exports.useRouter = exports.useProxy = exports.usePrevious = exports.useOptimistic = exports.useOnScreen = exports.useOnClickOutside = exports.useMediaQuery = exports.useLocalStorage = exports.useKeyPress = exports.useId = exports.useHover = exports.useFitText = exports.useEventListener = exports.useElementRect = exports.useDebounceCallbackEffect = exports.useDebounce = exports.useCounterTimer = exports.useBezierEasing = exports.useAsync = void 0;
 var _react = require("react");
 var _utils = require("./utils");
 var _queryString = _interopRequireDefault(require("query-string"));
@@ -29,6 +29,63 @@ function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" !=
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 var storage_ids = [];
 /**
+ * @description Hook que permite atualizar a IU de maneira otimista.
+ * @template T Tipo do estado
+ * @template V Tipo do valor otimista
+ * @param {T} state Estado atual
+ * @param {(currentState: T, optimisticValue: V) => T} updateFn Função de atualização
+ * @returns {[T, function]} Estado otimista e função de adição otimista
+ * @example
+ * const App = () => {
+ *  const [messages, setMessages] = useState([]);
+ *
+ *  const [optimisticMessages, addOptimisticMessage] = useOptimistic(
+ *      messages,
+ *      (currentState, optimisticValue) => {
+ *          return [...currentState, {...optimisticValue, sending: true}];
+ *      }
+ *  );
+ *
+ *  const handleClick = () => {
+ *      const id = uniqueid(16);
+ *      addOptimisticMessage({id, text: "Nova mensagem"});
+ *      fetch("https://api.example.com/messages", {
+ *          method: "POST",
+ *          body: JSON.stringify({id, text: "Nova mensagem"}),
+ *          headers: {
+ *              "Content-Type": "application/json",
+ *          },
+ *      });
+ *  };
+ *
+ *  return (
+ *      <div>
+ *          <ul>
+ *              {optimisticMessages.map((message) => (
+ *                  <li key={message.id}>{message.text}</li>
+ *              ))}
+ *          </ul>
+ *          <button onClick={handleClick}>Adicionar mensagem</button>
+ *      </div>
+ *  );
+ * };
+ */
+var useOptimistic = exports.useOptimistic = function useOptimistic(state, updateFn) {
+  var _useState = (0, _react.useState)(state),
+    _useState2 = _slicedToArray(_useState, 2),
+    optimisticState = _useState2[0],
+    setOptimisticState = _useState2[1];
+  (0, _react.useEffect)(function () {
+    setOptimisticState(state);
+  }, [state]);
+  var addOptimistic = function addOptimistic(value) {
+    setOptimisticState(function (currentState) {
+      return updateFn(currentState, value);
+    });
+  };
+  return [optimisticState, addOptimistic];
+};
+/**
  * @description Gancho para gerar um ID exclusivo
  * @param {string} [idName] Nome do ID (opcional)
  * @returns {string} ID exclusivo
@@ -39,7 +96,7 @@ var storage_ids = [];
  * };
  */
 var useId = exports.useId = function useId(idName) {
-  var _useState = (0, _react.useState)(function () {
+  var _useState3 = (0, _react.useState)(function () {
       if (typeof idName === "string") {
         if (storage_ids.includes(idName)) {
           return idName;
@@ -54,8 +111,8 @@ var useId = exports.useId = function useId(idName) {
       }
       return id;
     }()),
-    _useState2 = _slicedToArray(_useState, 1),
-    id = _useState2[0];
+    _useState4 = _slicedToArray(_useState3, 1),
+    id = _useState4[0];
   return id;
 };
 /**
@@ -75,10 +132,10 @@ var useId = exports.useId = function useId(idName) {
  * };
  */
 var useProxy = exports.useProxy = function useProxy(target, onChange) {
-  var _useState3 = (0, _react.useState)(target !== null && target !== void 0 ? target : {}),
-    _useState4 = _slicedToArray(_useState3, 2),
-    targetMoment = _useState4[0],
-    setTargetMoment = _useState4[1];
+  var _useState5 = (0, _react.useState)(target !== null && target !== void 0 ? target : {}),
+    _useState6 = _slicedToArray(_useState5, 2),
+    targetMoment = _useState6[0],
+    setTargetMoment = _useState6[1];
   var bySet = (0, _react.useCallback)(function (target, property, value, receiver) {
     target[property] = value;
     setTargetMoment(function (p) {
@@ -148,10 +205,10 @@ var useDebounceCallbackEffect = exports.useDebounceCallbackEffect = function use
  */
 var useDebounce = exports.useDebounce = function useDebounce(value) {
   var delay = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1000;
-  var _useState5 = (0, _react.useState)(value),
-    _useState6 = _slicedToArray(_useState5, 2),
-    debouncedValue = _useState6[0],
-    setDebouncedValue = _useState6[1];
+  var _useState7 = (0, _react.useState)(value),
+    _useState8 = _slicedToArray(_useState7, 2),
+    debouncedValue = _useState8[0],
+    setDebouncedValue = _useState8[1];
   (0, _react.useEffect)(function () {
     var handler = setTimeout(function () {
       setDebouncedValue(value);
@@ -177,13 +234,13 @@ var useDebounce = exports.useDebounce = function useDebounce(value) {
  * };
  */
 var useWindowSize = exports.useWindowSize = function useWindowSize() {
-  var _useState7 = (0, _react.useState)({
+  var _useState9 = (0, _react.useState)({
       width: 0,
       height: 0
     }),
-    _useState8 = _slicedToArray(_useState7, 2),
-    windowSize = _useState8[0],
-    setWindowSize = _useState8[1];
+    _useState10 = _slicedToArray(_useState9, 2),
+    windowSize = _useState10[0],
+    setWindowSize = _useState10[1];
   (0, _react.useEffect)(function () {
     var time;
     function handleResize() {
@@ -240,18 +297,18 @@ var useWindowSize = exports.useWindowSize = function useWindowSize() {
  */
 var useAsync = exports.useAsync = function useAsync(asyncFunction) {
   var immediate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-  var _useState9 = (0, _react.useState)("idle"),
-    _useState10 = _slicedToArray(_useState9, 2),
-    status = _useState10[0],
-    setStatus = _useState10[1];
-  var _useState11 = (0, _react.useState)(null),
+  var _useState11 = (0, _react.useState)("idle"),
     _useState12 = _slicedToArray(_useState11, 2),
-    value = _useState12[0],
-    setValue = _useState12[1];
+    status = _useState12[0],
+    setStatus = _useState12[1];
   var _useState13 = (0, _react.useState)(null),
     _useState14 = _slicedToArray(_useState13, 2),
-    error = _useState14[0],
-    setError = _useState14[1];
+    value = _useState14[0],
+    setValue = _useState14[1];
+  var _useState15 = (0, _react.useState)(null),
+    _useState16 = _slicedToArray(_useState15, 2),
+    error = _useState16[0],
+    setError = _useState16[1];
   var execute = (0, _react.useCallback)(function () {
     setStatus("pending");
     //setValue(null);
@@ -291,10 +348,10 @@ var useAsync = exports.useAsync = function useAsync(asyncFunction) {
  */
 var useToggle = exports.useToggle = function useToggle() {
   var initialState = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-  var _useState15 = (0, _react.useState)(initialState),
-    _useState16 = _slicedToArray(_useState15, 2),
-    state = _useState16[0],
-    setState = _useState16[1];
+  var _useState17 = (0, _react.useState)(initialState),
+    _useState18 = _slicedToArray(_useState17, 2),
+    state = _useState18[0],
+    setState = _useState18[1];
   var toggle = (0, _react.useCallback)(function () {
     return setState(function (state) {
       return !state;
@@ -366,34 +423,34 @@ history.go = _wr("go");
 var useRouter = exports.useRouter = function useRouter() {
   var _window$history$state;
   var path = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
-  var _useState17 = (0, _react.useState)((0, _utils.normalizePath)(window.location.pathname)),
-    _useState18 = _slicedToArray(_useState17, 2),
-    pathname = _useState18[0],
-    setPathname = _useState18[1];
-  var _useState19 = (0, _react.useState)(window.location.search),
+  var _useState19 = (0, _react.useState)((0, _utils.normalizePath)(window.location.pathname)),
     _useState20 = _slicedToArray(_useState19, 2),
-    search = _useState20[0],
-    setSearch = _useState20[1];
-  var _useState21 = (0, _react.useState)(window.location.hash),
+    pathname = _useState20[0],
+    setPathname = _useState20[1];
+  var _useState21 = (0, _react.useState)(window.location.search),
     _useState22 = _slicedToArray(_useState21, 2),
-    hash = _useState22[0],
-    setHash = _useState22[1];
-  var _useState23 = (0, _react.useState)((_window$history$state = window.history.state) !== null && _window$history$state !== void 0 ? _window$history$state : {}),
+    search = _useState22[0],
+    setSearch = _useState22[1];
+  var _useState23 = (0, _react.useState)(window.location.hash),
     _useState24 = _slicedToArray(_useState23, 2),
-    state = _useState24[0],
-    setState = _useState24[1];
-  var _useState25 = (0, _react.useState)({}),
+    hash = _useState24[0],
+    setHash = _useState24[1];
+  var _useState25 = (0, _react.useState)((_window$history$state = window.history.state) !== null && _window$history$state !== void 0 ? _window$history$state : {}),
     _useState26 = _slicedToArray(_useState25, 2),
-    query = _useState26[0],
-    setQuery = _useState26[1];
-  var _useState27 = (0, _react.useState)(historyLength),
+    state = _useState26[0],
+    setState = _useState26[1];
+  var _useState27 = (0, _react.useState)({}),
     _useState28 = _slicedToArray(_useState27, 2),
-    length = _useState28[0],
-    setLength = _useState28[1];
-  var _useState29 = (0, _react.useState)(historyCurrentIndex),
+    query = _useState28[0],
+    setQuery = _useState28[1];
+  var _useState29 = (0, _react.useState)(historyLength),
     _useState30 = _slicedToArray(_useState29, 2),
-    currentIndex = _useState30[0],
-    setCurrentIndex = _useState30[1];
+    length = _useState30[0],
+    setLength = _useState30[1];
+  var _useState31 = (0, _react.useState)(historyCurrentIndex),
+    _useState32 = _slicedToArray(_useState31, 2),
+    currentIndex = _useState32[0],
+    setCurrentIndex = _useState32[1];
   var updateInformatio = function updateInformatio() {
     var _window$history$state2, _window$history$state3;
     setPathname((0, _utils.normalizePath)(window.location.pathname));
@@ -517,10 +574,10 @@ var useMediaQuery = exports.useMediaQuery = function useMediaQuery(queries, defa
       media = _ref$media === void 0 ? "" : _ref$media;
     return typeof queries[media] !== "undefined" ? queries[media] : defaultValue;
   };
-  var _useState31 = (0, _react.useState)(getValue),
-    _useState32 = _slicedToArray(_useState31, 2),
-    value = _useState32[0],
-    setValue = _useState32[1];
+  var _useState33 = (0, _react.useState)(getValue),
+    _useState34 = _slicedToArray(_useState33, 2),
+    value = _useState34[0],
+    setValue = _useState34[1];
   (0, _react.useEffect)(function () {
     var handler = function handler() {
       return setValue(getValue);
@@ -551,14 +608,14 @@ var useMediaQuery = exports.useMediaQuery = function useMediaQuery(queries, defa
  * };
  */
 var useStateHistory = exports.useStateHistory = function useStateHistory(initialPresent) {
-  var _useState33 = (0, _react.useState)({
+  var _useState35 = (0, _react.useState)({
       past: [],
       present: initialPresent,
       future: []
     }),
-    _useState34 = _slicedToArray(_useState33, 2),
-    state = _useState34[0],
-    setState = _useState34[1];
+    _useState36 = _slicedToArray(_useState35, 2),
+    state = _useState36[0],
+    setState = _useState36[1];
   var canUndo = state.past.length !== 0;
   var canRedo = state.future.length !== 0;
   var undo = function undo() {
@@ -644,10 +701,10 @@ var useStateHistory = exports.useStateHistory = function useStateHistory(initial
  * };
  */
 var useScript = exports.useScript = function useScript(src) {
-  var _useState35 = (0, _react.useState)(src ? "loading" : "idle"),
-    _useState36 = _slicedToArray(_useState35, 2),
-    status = _useState36[0],
-    setStatus = _useState36[1];
+  var _useState37 = (0, _react.useState)(src ? "loading" : "idle"),
+    _useState38 = _slicedToArray(_useState37, 2),
+    status = _useState38[0],
+    setStatus = _useState38[1];
   (0, _react.useEffect)(function () {
     if (!src) {
       setStatus("idle");
@@ -734,10 +791,10 @@ var useKeyPress = exports.useKeyPress = function useKeyPress(targetKey, handler)
  */
 var useOnScreen = exports.useOnScreen = function useOnScreen(ref) {
   var rootMargin = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "0px";
-  var _useState37 = (0, _react.useState)(false),
-    _useState38 = _slicedToArray(_useState37, 2),
-    isIntersecting = _useState38[0],
-    setIntersecting = _useState38[1];
+  var _useState39 = (0, _react.useState)(false),
+    _useState40 = _slicedToArray(_useState39, 2),
+    isIntersecting = _useState40[0],
+    setIntersecting = _useState40[1];
   (0, _react.useEffect)(function () {
     var observer = new IntersectionObserver(function (_ref8) {
       var _ref9 = _slicedToArray(_ref8, 1),
@@ -774,13 +831,13 @@ var useOnScreen = exports.useOnScreen = function useOnScreen(ref) {
  * };
  */
 var usePrevious = exports.usePrevious = function usePrevious(value) {
-  var _useState39 = (0, _react.useState)({
+  var _useState41 = (0, _react.useState)({
       previous: undefined,
       actual: value
     }),
-    _useState40 = _slicedToArray(_useState39, 2),
-    state = _useState40[0],
-    setState = _useState40[1];
+    _useState42 = _slicedToArray(_useState41, 2),
+    state = _useState42[0],
+    setState = _useState42[1];
   (0, _react.useEffect)(function () {
     setState(function (_ref10) {
       var actual = _ref10.actual;
@@ -823,10 +880,10 @@ var useOnClickOutside = exports.useOnClickOutside = function useOnClickOutside(r
   }, [ref, handler]);
 };
 var useHover = exports.useHover = function useHover(ref) {
-  var _useState41 = (0, _react.useState)(false),
-    _useState42 = _slicedToArray(_useState41, 2),
-    value = _useState42[0],
-    setValue = _useState42[1];
+  var _useState43 = (0, _react.useState)(false),
+    _useState44 = _slicedToArray(_useState43, 2),
+    value = _useState44[0],
+    setValue = _useState44[1];
   var handleMouseOver = function handleMouseOver() {
     return setValue(true);
   };
@@ -862,10 +919,10 @@ var useCounterTimer = exports.useCounterTimer = function useCounterTimer() {
   var delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
   var duration = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1000;
   var delayFrame = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-  var _useState43 = (0, _react.useState)(0),
-    _useState44 = _slicedToArray(_useState43, 2),
-    elapsed = _useState44[0],
-    setTime = _useState44[1];
+  var _useState45 = (0, _react.useState)(0),
+    _useState46 = _slicedToArray(_useState45, 2),
+    elapsed = _useState46[0],
+    setTime = _useState46[1];
   (0, _react.useEffect)(function () {
     var interval,
       current = Date.now(),
@@ -1021,7 +1078,7 @@ var useBezierEasing = exports.useBezierEasing = function useBezierEasing() {
  * };
  */
 var useLocalStorage = exports.useLocalStorage = function useLocalStorage(key, initialValue) {
-  var _useState45 = (0, _react.useState)(function () {
+  var _useState47 = (0, _react.useState)(function () {
       if (typeof window === "undefined") {
         return initialValue;
       }
@@ -1034,9 +1091,9 @@ var useLocalStorage = exports.useLocalStorage = function useLocalStorage(key, in
         return initialValue;
       }
     }()),
-    _useState46 = _slicedToArray(_useState45, 2),
-    storedValue = _useState46[0],
-    __setStoredValue = _useState46[1];
+    _useState48 = _slicedToArray(_useState47, 2),
+    storedValue = _useState48[0],
+    __setStoredValue = _useState48[1];
   var setStoredValue = function setStoredValue(value) {
     try {
       var _JSON$parse2;
@@ -1080,7 +1137,7 @@ var useLocalStorage = exports.useLocalStorage = function useLocalStorage(key, in
  * };
  */
 var useElementRect = exports.useElementRect = function useElementRect(ref) {
-  var _useState47 = (0, _react.useState)({
+  var _useState49 = (0, _react.useState)({
       width: 0,
       height: 0,
       bottom: 0,
@@ -1090,9 +1147,9 @@ var useElementRect = exports.useElementRect = function useElementRect(ref) {
       x: 0,
       y: 0
     }),
-    _useState48 = _slicedToArray(_useState47, 2),
-    rect = _useState48[0],
-    setRect = _useState48[1];
+    _useState50 = _slicedToArray(_useState49, 2),
+    rect = _useState50[0],
+    setRect = _useState50[1];
   (0, _react.useEffect)(function () {
     var time;
     var getSize = function getSize() {
@@ -1193,5 +1250,5 @@ var useFitText = exports.useFitText = function useFitText(textRef, containerRef)
       cancelAnimationFrame(frameNumber);
       window.removeEventListener("resize", fitText);
     };
-  }, [minFontSize, maxFontSize]);
+  }, [minFontSize, maxFontSize, textRef.current, containerRef.current, increment]);
 };

@@ -8,6 +8,8 @@ export declare const matchPath: (path: string | RegExp | (string | RegExp)[], ur
         [key: string]: string;
     };
     query: any;
+    path: string | undefined;
+    pathValid: string | RegExp | undefined;
 };
 /**
  * @function {@link https://github.com/gre/bezier-easing bezierEasing-Github}

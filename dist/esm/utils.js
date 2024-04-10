@@ -81,7 +81,7 @@ export const matchPath = (path, url) => {
     const matches = pathValid instanceof RegExp ? !!match : !!match && match[0] === match.input;
     const params = match ? match.groups || {} : {};
     const search = getQuery(urlParsed?.search ?? "");
-    return { exact: matches, search, params, query: Object.assign({}, params, search) };
+    return { exact: matches, search, params, query: Object.assign({}, params, search), path: matches ? urlParsed?.pathname : undefined, pathValid };
 };
 /**
  * @function {@link https://github.com/gre/bezier-easing bezierEasing-Github}

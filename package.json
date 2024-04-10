@@ -1,10 +1,10 @@
 {
 	"name": "react-use-utils",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"type": "module",
 	"description": "Uma coleção de ganchos e utilitários React",
 	"comments": "O pacote é um módulo ES6 e deve ser importado como tal. Não é necessário transpilar o código para usá-lo. O pacote é compatível com a versão 16.8.0 do React ou superior. Para versões anteriores, consulte a documentação oficial do React sobre como usar ganchos personalizados.",
-	"main": "dist/cjs/index.js",
+	"main": "./dist/cjs/index.js",
 	"module": "./dist/esm/index.js",
 	"types": "./dist/types/index.d.ts",
 	"files": [
