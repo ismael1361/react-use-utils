@@ -7,6 +7,7 @@ Essa lib é um conjunto de hooks que facilitam o desenvolvimento de aplicações
   - [Uso](#uso)
   - [Hooks](#hooks)
     - [useOptimistic](#useoptimistic)
+    - [useTransition](#usetransition)
     - [useId](#useid)
     - [useProxy](#useproxy)
     - [useDebounceCallbackEffect](#usedebouncecallbackeffect)
@@ -103,6 +104,45 @@ const App: React.FC = () => {
       ))}
       <button onClick={() => addMessage({ id: messages.length, text: 'Hello' })}>
         Add message
+      </button>
+    </div>
+  );
+};
+```
+
+### useTransition
+
+```ts
+useTransition(): [boolean, (callback: () => Promise<any | void>) => void]
+```
+
+Hook que permite verificar pendência em uma função assíncrono, como uma requisição HTTP.
+
+- `return`: Retorna um array com um valor booleano (true se caso a função assíncron estiver pendente) e uma função para executar uma função assíncrona.
+
+```tsx
+import React from 'react';
+import { useTransition } from 'react-use-utils';
+
+const App: React.FC = () => {
+  const [isPending, run] = useTransition();
+
+  const fetchData = async () => {
+    const response = await fetch('https://jsonplaceholder.typicode.com/todos/1');
+    return response.json();
+  };
+
+  const handleClick = async () => {
+    run(async () => {
+      const data = await fetchData();
+      console.log(data);
+    });
+  };
+
+  return (
+    <div>
+      <button onClick={handleClick} disabled={isPending}>
+        {isPending ? 'Loading...' : 'Fetch data'}
       </button>
     </div>
   );

@@ -63,6 +63,40 @@ export const useOptimistic = <T = any, V = any>(state: T, updateFn: (currentStat
 };
 
 /**
+ * @description Hook que permite verificar pendência em uma função assíncrono, como uma requisição HTTP.
+ * @returns {[boolean, function]} Estado de pendência e função de transição
+ * @example
+ * const App = () => {
+ * const [isPending, transition] = useTransition();
+ * const handleClick = async () => {
+ *    transition(async () => {
+ *       await fetch("https://api.example.com/data");
+ *   });
+ * };
+ * return (
+ *  <div>
+ *     <button onClick={handleClick} disabled={isPending}>
+ *       {isPending ? "Carregando..." : "Carregar dados"}
+ *    </button>
+ * </div>
+ * );
+ * };
+ */
+export const useTransition = (): [boolean, (callback: () => Promise<any | void>) => void] => {
+	const [isPending, setIsPending] = useState<boolean>(false);
+
+	const transition = useCallback(async (callback: () => Promise<any | void>) => {
+		setIsPending(true);
+		try {
+			await callback();
+		} catch {}
+		setIsPending(false);
+	}, []);
+
+	return [isPending, transition];
+};
+
+/**
  * @description Gancho para gerar um ID exclusivo
  * @param {string} [idName] Nome do ID (opcional)
  * @returns {string} ID exclusivo
